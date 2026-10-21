@@ -1,0 +1,50 @@
+"""Common reusable schemas: standard error envelopes and pagination wrappers."""
+
+from typing import Any, Generic, TypeVar
+
+from pydantic import BaseModel, ConfigDict
+
+T = TypeVar("T")
+
+
+class ErrorDetail(BaseModel):
+    code: str
+    message: str
+    details: list[dict[str, Any]] | None = None
+    request_id: str | None = None
+
+
+class ErrorResponse(BaseModel):
+    error: ErrorDetail
+
+
+class PaginationMeta(BaseModel):
+    page: int
+    page_size: int
+    total: int
+    pages: int
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: list[T]
+    total: int
+    limit: int
+    offset: int
+    model_config = ConfigDict(extra="forbid")
+
+
+class CollectionResponse(BaseModel):
+    """Additive paging metadata; omitted limit preserves existing full-response clients."""
+    total: int | None = None
+    limit: int | None = None
+    offset: int = 0
+
+
+def paginate_collection(response: CollectionResponse, limit: int | None, offset: int):
+    total = len(response.items)
+    if limit is None:
+        return response.model_copy(update={"total": total, "limit": None, "offset": 0})
+    return response.model_copy(update={
+        "items": response.items[offset:offset + limit],
+        "total": total, "limit": limit, "offset": offset,
+    })
