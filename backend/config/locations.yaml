@@ -39,3 +39,203 @@ locations:
     latitude: 22.57260
     longitude: 88.36390
     is_active: true
+
+  - slug: "hyderabad"
+    name: "Hyderabad"
+    region: "Telangana"
+    country_code: "IN"
+    latitude: 17.38500
+    longitude: 78.48670
+    is_active: true
+
+  - slug: "pune"
+    name: "Pune"
+    region: "Maharashtra"
+    country_code: "IN"
+    latitude: 18.52040
+    longitude: 73.85670
+    is_active: true
+
+  - slug: "ahmedabad"
+    name: "Ahmedabad"
+    region: "Gujarat"
+    country_code: "IN"
+    latitude: 23.02250
+    longitude: 72.57140
+    is_active: true
+
+  - slug: "jaipur"
+    name: "Jaipur"
+    region: "Rajasthan"
+    country_code: "IN"
+    latitude: 26.91240
+    longitude: 75.78730
+    is_active: true
+
+  - slug: "lucknow"
+    name: "Lucknow"
+    region: "Uttar Pradesh"
+    country_code: "IN"
+    latitude: 26.84670
+    longitude: 80.94620
+    is_active: true
+
+  - slug: "kanpur"
+    name: "Kanpur"
+    region: "Uttar Pradesh"
+    country_code: "IN"
+    latitude: 26.44990
+    longitude: 80.33190
+    is_active: true
+
+  - slug: "nagpur"
+    name: "Nagpur"
+    region: "Maharashtra"
+    country_code: "IN"
+    latitude: 21.14580
+    longitude: 79.08820
+    is_active: true
+
+  - slug: "indore"
+    name: "Indore"
+    region: "Madhya Pradesh"
+    country_code: "IN"
+    latitude: 22.71960
+    longitude: 75.85770
+    is_active: true
+
+  - slug: "bhopal"
+    name: "Bhopal"
+    region: "Madhya Pradesh"
+    country_code: "IN"
+    latitude: 23.25990
+    longitude: 77.41260
+    is_active: true
+
+  - slug: "patna"
+    name: "Patna"
+    region: "Bihar"
+    country_code: "IN"
+    latitude: 25.59410
+    longitude: 85.13760
+    is_active: true
+
+  - slug: "bhubaneswar"
+    name: "Bhubaneswar"
+    region: "Odisha"
+    country_code: "IN"
+    latitude: 20.29610
+    longitude: 85.82450
+    is_active: true
+
+  - slug: "guwahati"
+    name: "Guwahati"
+    region: "Assam"
+    country_code: "IN"
+    latitude: 26.14450
+    longitude: 91.73620
+    is_active: true
+
+  - slug: "chandigarh"
+    name: "Chandigarh"
+    region: "Chandigarh"
+    country_code: "IN"
+    latitude: 30.73330
+    longitude: 76.77940
+    is_active: true
+
+  - slug: "srinagar"
+    name: "Srinagar"
+    region: "Jammu and Kashmir"
+    country_code: "IN"
+    latitude: 34.08370
+    longitude: 74.79730
+    is_active: true
+
+  - slug: "shimla"
+    name: "Shimla"
+    region: "Himachal Pradesh"
+    country_code: "IN"
+    latitude: 31.10480
+    longitude: 77.17340
+    is_active: true
+
+  - slug: "dehradun"
+    name: "Dehradun"
+    region: "Uttarakhand"
+    country_code: "IN"
+    latitude: 30.31650
+    longitude: 78.03220
+    is_active: true
+
+  - slug: "ranchi"
+    name: "Ranchi"
+    region: "Jharkhand"
+    country_code: "IN"
+    latitude: 23.34410
+    longitude: 85.30960
+    is_active: true
+
+  - slug: "raipur"
+    name: "Raipur"
+    region: "Chhattisgarh"
+    country_code: "IN"
+    latitude: 21.25140
+    longitude: 81.62960
+    is_active: true
+
+  - slug: "surat"
+    name: "Surat"
+    region: "Gujarat"
+    country_code: "IN"
+    latitude: 21.17020
+    longitude: 72.83110
+    is_active: true
+
+  - slug: "visakhapatnam"
+    name: "Visakhapatnam"
+    region: "Andhra Pradesh"
+    country_code: "IN"
+    latitude: 17.68680
+    longitude: 83.21850
+    is_active: true
+
+  - slug: "vijayawada"
+    name: "Vijayawada"
+    region: "Andhra Pradesh"
+    country_code: "IN"
+    latitude: 16.50620
+    longitude: 80.64800
+    is_active: true
+
+  - slug: "kochi"
+    name: "Kochi"
+    region: "Kerala"
+    country_code: "IN"
+    latitude: 9.93120
+    longitude: 76.26730
+    is_active: true
+
+  - slug: "thiruvananthapuram"
+    name: "Thiruvananthapuram"
+    region: "Kerala"
+    country_code: "IN"
+    latitude: 8.52410
+    longitude: 76.93660
+    is_active: true
+
+  - slug: "coimbatore"
+    name: "Coimbatore"
+    region: "Tamil Nadu"
+    country_code: "IN"
+    latitude: 11.01680
+    longitude: 76.95580
+    is_active: true
+
+  - slug: "panaji"
+    name: "Panaji"
+    region: "Goa"
+    country_code: "IN"
+    latitude: 15.49090
+    longitude: 73.82780
+    is_active: true

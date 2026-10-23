@@ -103,6 +103,7 @@ class IngestionWorker:
                             args=[src.id, src.name],
                             id=job_id,
                             name=f"Ingest {src.name}",
+                            next_run_time=datetime.now(UTC),
                             max_instances=1,
                             coalesce=True,
                             misfire_grace_time=60,

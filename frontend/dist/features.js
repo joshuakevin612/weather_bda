@@ -1,3 +1,5 @@
+import {errorMessage} from './p1.js';
+import {advanceRange,watchRefresh} from './live.js';
 import { request, retryRemaining } from './api.js';
 
 export const featurePages = ['Submit report', 'Track report', 'Weather explorer', 'Weather trends', 'Review queue', 'Ingestion monitor'];
@@ -15,7 +17,7 @@ function safeLink(url, label) {
   try { const parsed = new URL(url); if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return `<a href="${esc(parsed.href)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`; } catch { /* Plain metadata for invalid URLs. */ }
   return esc(label);
 }
-function errorText(error) { return `${error.message}${error.request_id ? ` · Request ID: ${error.request_id}` : ''}`; }
+function errorText(error) { return errorMessage(error); }
 function showError(node, error) { node.textContent = errorText(error); node.setAttribute('role', 'alert'); }
 function mapErrors(form, error) {
   form.querySelectorAll('[data-error]').forEach(node => { node.textContent = ''; });
@@ -141,19 +143,24 @@ export function renderFeature(page, context) {
     const trends = page === 'Weather trends';
     root.innerHTML = panel(page, `<form class="p0-form p0-filters">${selectLocation(trends)}${selectKind()}${dateFilters()}${trends ? field('metric', 'Metric', `<select name="metric">${options(metrics)}</select>`) + field('interval', 'Interval', `<select name="interval">${options({ day: 'Day', hour: 'Hour', week: 'Week', month: 'Month' })}</select>`) + field('agg', 'Aggregation', `<select name="agg">${options({ avg: 'Average', min: 'Minimum', max: 'Maximum', count: 'Count' })}</select>`) + '<label><input type="checkbox" name="include_trend"> Show trend line</label>' : input('source', 'Source name (optional)', 'placeholder="Backend source name"') + field('sort', 'Sort by valid time', `<select name="sort">${options({ '-valid_at': 'Newest first', valid_at: 'Oldest first' })}</select>`)}<button class="primary">Apply filters</button><p data-filter-error role="alert"></p></form><div id="weather-result"></div>`);
     const form = root.querySelector('form'), result = root.querySelector('#weather-result');
-    let selected = null, current = null, readAbort;
+    let selected = null, current = null, readAbort, busy = false;
+    watchRefresh(root, form, abort.signal, follow => {
+      if (!selected || busy) return;
+      if (follow) selected = advanceRange(selected);
+      load(current?.offset || 0);
+    });
     if (trends) form.elements.metric.onchange = () => { const rain = form.elements.metric.value === 'precipitation_mm'; form.elements.agg.innerHTML = options(rain ? { sum: 'Sum', avg: 'Average', min: 'Minimum', max: 'Maximum', count: 'Count' } : { avg: 'Average', min: 'Minimum', max: 'Maximum', count: 'Count' }); };
     const attribution = (source, kind) => `<span class="badge">${source?.trust_level === 'provider_model' ? kind === 'forecast' ? 'Forecast · model-derived' : 'Model-derived observation' : source?.trust_level === 'official' ? 'Official data' : esc(source?.trust_level || 'Unknown trust')}</span> ${esc(source?.display_name || source?.name || '')}<small>${esc(source?.attribution_text || '')}</small>`;
     const draw = () => {
       if (!current) return;
       if (trends) { drawSeries(); return; }
-      result.innerHTML = `${utcButton()}<div class="table-scroll"><table><thead><tr><th>Valid time</th><th>Location</th><th>Temperature °C</th><th>Humidity %</th><th>Rain mm</th><th>Wind km/h</th><th>Kind / basis / trust</th></tr></thead><tbody>${current.items.map(record => `<tr><td><button class="report-link" data-weather="${esc(record.id)}">${date(record.valid_at)}</button></td><td>${esc(record.location?.name)}</td>${['temperature_c', 'relative_humidity_pct', 'precipitation_mm', 'wind_speed_kmh'].map(metric => `<td>${number(record.measurements?.[metric])}</td>`).join('')}<td><span class="badge">${esc(record.kind)}</span> <span class="badge">${esc(record.measurement_basis)}</span>${attribution(record.source, record.kind)}</td></tr>`).join('') || '<tr><td colspan="7">No weather records in this range.</td></tr>'}</tbody></table></div>`;
+      result.innerHTML = `${utcButton()}<div class="table-scroll"><table><thead><tr><th>Valid time</th><th>Location</th><th>Temperature °C</th><th>Humidity %</th><th>Rain mm</th><th>Wind km/h</th><th>Weather source</th></tr></thead><tbody>${current.items.map(record => `<tr><td><button class="report-link" data-weather="${esc(record.id)}">${date(record.valid_at)}</button></td><td>${esc(record.location?.name)}</td>${['temperature_c', 'relative_humidity_pct', 'precipitation_mm', 'wind_speed_kmh'].map(metric => `<td>${number(record.measurements?.[metric])}</td>`).join('')}<td><span class="badge">${esc(record.kind)}</span> ${attribution(record.source, record.kind)}</td></tr>`).join('') || '<tr><td colspan="7">No weather records in this range.</td></tr>'}</tbody></table></div>`;
       result.append(pager(current, load)); bindUTC(draw);
       result.querySelectorAll('[data-weather]').forEach(button => button.onclick = () => weatherDetail(button.dataset.weather));
     };
     async function weatherDetail(id) {
       const dialog = document.querySelector('#detail'); dialog.innerHTML = '<div class="dialog-body" role="status">Loading weather detail…</div>'; dialog.showModal();
-      try { const record = await api(`/weather/${encodeURIComponent(id)}`); if (!dialog.open) return; dialog.innerHTML = `<div class="dialog-head"><h2>Weather record ${esc(record.id)}</h2><button data-close aria-label="Close weather detail">×</button></div><div class="dialog-body"><p>${esc(record.location?.name)} · ${date(record.valid_at)}</p><p>${esc(record.kind)} · ${esc(record.measurement_basis)}</p>${attribution(record.source, record.kind)}<dl>${Object.entries(record.measurements || {}).map(([key, value]) => `<dt>${esc(key.replaceAll('_', ' '))}</dt><dd>${number(value)}</dd>`).join('')}</dl><p>Issued: ${date(record.issued_at)} · Fetched: ${date(record.fetched_at)}</p></div>`; dialog.querySelector('[data-close]').onclick = () => dialog.close(); }
+      try { const record = await api(`/weather/${encodeURIComponent(id)}`); if (!dialog.open) return; dialog.innerHTML = `<div class="dialog-head"><h2>Weather record ${esc(record.id)}</h2><button data-close aria-label="Close weather detail">×</button></div><div class="dialog-body"><p>${esc(record.location?.name)} · ${date(record.valid_at)}</p><p>${record.kind === 'forecast' ? 'Forecast' : 'Observation'}</p>${attribution(record.source, record.kind)}<dl>${Object.entries(record.measurements || {}).map(([key, value]) => `<dt>${esc(key.replaceAll('_', ' '))}</dt><dd>${number(value)}</dd>`).join('')}</dl><p>Issued: ${date(record.issued_at)} · Fetched: ${date(record.fetched_at)}</p></div>`; dialog.querySelector('[data-close]').onclick = () => dialog.close(); }
       catch (error) { if (error.name !== 'AbortError' && error.status !== 401) { dialog.innerHTML = '<div class="dialog-head"><button data-close>Close</button></div><div class="dialog-body" data-error></div>'; showError(dialog.querySelector('[data-error]'), error); dialog.querySelector('[data-close]').onclick = () => dialog.close(); } }
     }
     function drawSeries() {
@@ -168,12 +175,12 @@ export function renderFeature(page, context) {
       bindUTC(drawSeries);
     }
     async function load(offset = 0) {
-      readAbort?.abort(); readAbort = new AbortController();
+      readAbort?.abort(); const activeRead = new AbortController(); readAbort = activeRead; busy = true;
       result.innerHTML = blank('Loading weather…'); const button = form.querySelector('button'); button.disabled = true;
       const path = trends ? '/analytics/timeseries' : '/weather';
-      try { current = await api(`${path}?${query({ ...selected, ...(trends ? {} : { limit: 50, offset }) })}`, { signal: readAbort.signal }); draw(); }
+      try { current = await api(`${path}?${query({ ...selected, ...(trends ? {} : { limit: 50, offset }) })}`, { signal: activeRead.signal }); if (abort.signal.aborted || activeRead.signal.aborted) return; draw(); context.synced(); }
       catch (error) { mapErrors(form, error); failure(result, error, () => load(offset)); }
-      finally { cooldown(button, path); }
+      finally { if (readAbort === activeRead) { busy = false; cooldown(button, path); } }
     }
     form.onsubmit = event => {
       event.preventDefault(); const error = form.querySelector('[data-filter-error]'); error.textContent = '';

@@ -242,6 +242,22 @@ def cmd_seed_locations(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_enable_weather(_args: argparse.Namespace) -> int:
+    """Enable periodic weather collection, including on existing installations."""
+    from app.repositories.sources import DataSourceRepository
+
+    with SessionLocal() as db:
+        source = DataSourceRepository(db).get_by_name("open_meteo")
+        if source is None:
+            print("Run seed-sources first.", file=sys.stderr)
+            return 1
+        source.is_enabled = True
+        source.interval_seconds = 900
+        db.commit()
+    print("Weather collection enabled every 15 minutes. Run the worker with INGESTION_ENABLED=true.")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Weather BDA Backend CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -279,6 +295,9 @@ def build_parser() -> argparse.ArgumentParser:
         "seed-sources", help="Seed default reference data sources"
     )
     sources_parser.set_defaults(func=cmd_seed_sources)
+
+    weather_parser = subparsers.add_parser("enable-weather", help="Enable weather updates every 15 minutes")
+    weather_parser.set_defaults(func=cmd_enable_weather)
 
     # seed-locations
     loc_parser = subparsers.add_parser("seed-locations", help="Seed locations from YAML file")

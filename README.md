@@ -67,6 +67,7 @@ python -m app.cli check-config
 alembic upgrade head
 python -m app.cli seed-sources
 python -m app.cli seed-locations --file config/locations.yaml
+python -m app.cli enable-weather
 python -m app.cli create-admin --email you@example.com
 ```
 
@@ -99,7 +100,9 @@ The API origin is configured in `frontend/dist/config.js`. Stop each service wit
 
 ## Getting data
 
-A fresh database starts without weather observations or citizen reports. Seeded weather sources are disabled by default. Sign in as your administrator, configure and enable a supported source, then queue a manual ingestion run. The worker must be running to process it. Scheduled ingestion remains disabled unless `INGESTION_ENABLED=true` is set. See [backend setup and ingestion documentation](backend/README.md) for details.
+The location seed contains 30 cities across India. A fresh database starts without weather observations or citizen reports. The `enable-weather` setup command enables Open-Meteo collection every 15 minutes; set `INGESTION_ENABLED=true` in your runtime environment and keep the worker running. Newly enabled schedules fetch immediately. Existing installations should rerun location seeding and `enable-weather`, then restart the worker. Other providers still require configuration. See [update and deployment notes](UPDATE-NOTES.md) for the complete upgrade steps.
+
+The dashboard clock ticks every second and weather views refresh every 30 seconds, preserving filters. Observation timestamps retain their actual provider time; readings older than two hours are labeled outdated.
 
 Weather from Open-Meteo is model-derived data, not an official station measurement. Citizen reports require human review; news and statistical flags retain their own trust labels. Statistical analysis can show insufficient data until enough baseline history exists. Source attribution and license information are displayed by the application.
 
@@ -109,6 +112,7 @@ Weather from Open-Meteo is model-derived data, not an official station measureme
 # From frontend/
 npm run check
 npm run lint
+npm test
 npm run build
 
 # From backend/, with its environment activated

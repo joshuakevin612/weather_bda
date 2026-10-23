@@ -24,3 +24,6 @@ local-*.json
 Thumbs.db
 .idea/
 .vscode/
+
+# Local verification dependencies
+.test-deps/

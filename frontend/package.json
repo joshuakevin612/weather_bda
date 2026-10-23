@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "check": "node --check dist/app.js && node --check dist/api.js && node --check dist/data.js && node --check dist/features.js && node --check dist/config.js && node --check dist/p1.js && node --check dist/p2.js && node --check dist/p3.js",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/live.js && node --check dist/app.js && node --check dist/api.js && node --check dist/data.js && node --check dist/features.js && node --check dist/config.js && node --check dist/p1.js && node --check dist/p2.js && node --check dist/p3.js",
     "build": "node build.mjs",
-    "lint": "eslint dist/app.js dist/api.js dist/data.js dist/features.js dist/config.js dist/p1.js dist/p2.js dist/p3.js"
+    "lint": "eslint dist/live.js dist/app.js dist/api.js dist/data.js dist/features.js dist/config.js dist/p1.js dist/p2.js dist/p3.js"
   },
   "dependencies": {
     "esbuild": "0.28.2",

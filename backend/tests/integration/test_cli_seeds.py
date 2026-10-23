@@ -80,9 +80,9 @@ def test_seed_locations_from_default_yaml(db_session: Session, monkeypatch):
     assert exit_code == 0
 
     locations = db_session.query(Location).all()
-    assert len(locations) == 5
+    assert len(locations) == 30
     slugs = {loc.slug for loc in locations}
-    assert slugs == {"mumbai", "delhi", "bengaluru", "chennai", "kolkata"}
+    assert {"mumbai", "delhi", "bengaluru", "chennai", "kolkata", "hyderabad", "kochi", "guwahati"} <= slugs
 
     # Verify coordinates of Mumbai
     mumbai = db_session.query(Location).filter_by(slug="mumbai").one()
@@ -93,7 +93,7 @@ def test_seed_locations_from_default_yaml(db_session: Session, monkeypatch):
     # 2. Second run is idempotent
     exit_code2 = cmd_seed_locations(args)
     assert exit_code2 == 0
-    assert db_session.query(Location).count() == 5
+    assert db_session.query(Location).count() == 30
 
 
 def test_seed_locations_file_not_found(db_session: Session, monkeypatch):
